@@ -7,13 +7,13 @@ cd zchecker
 # Get a copy of this repository:
 wget https://github.com/mkelley/zchecker-support/archive/master.zip
 unzip master.zip
-mv zchecker-support-master/* .
-rmdir zchecker-support-master
+mv zchecker-support-master/{*.sh,*.py,*.env,*.txt,Pipfile*} .
+rm -rf master.zip zchecker-support-master
 
 # Create a virtual environment for zchecker:
 python3 -m venv .venv --prompt=zchecker
 source .venv/bin/activate
-pip install --upgrade pip
+pip install --upgrade pip setuptools
 pip install pipenv
 pipenv install
 
