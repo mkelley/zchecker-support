@@ -1,0 +1,90 @@
+# Requires bash
+
+# Create a zchecker working directory, with your name of choice:
+mkdir zchecker
+cd zchecker
+
+# Get a copy of this repository:
+wget https://github.com/mkelley/zchecker-support/archive/master.zip
+unzip master.zip
+mv zchecker-support-master/* .
+rmdir zchecker-support-master
+
+# Create a virtual environment for zchecker:
+python3 -m venv .venv --prompt=zchecker
+source .venv/bin/activate
+pip install --upgrade pip
+pip install pipenv
+pipenv install
+
+# Create zchecker data directories.  They can be anywhere.  Assuming
+# they are in the zchecker working directory:
+mkdir cutouts
+mkdir stacks
+
+# Get zbrowser:
+cd $ZDIR
+git clone https://github.com/mkelley/zbrowser.git
+
+# follow instructions in zbrowser/README.md
+
+# edit, move, and source zchecker.env
+edit zchecker.env
+mv zchecker.env ${VIRTUAL_ENV}/bin/
+source zchecker.env
+
+# Create a zchecker configuration file in your .config directory:
+cat >~/.config/zchecker.config<<EOF
+{
+  "database": "/path/to/zchecker.db",
+  "log": "/path/to/zchecker.log",
+  "user": "IRSA account user name",
+  "password": "IRSA account password",
+  "cutout path": "/path/to/cutouts",
+  "cutout size": "5arcmin",
+  "stack path": "/path/to/stacks"
+}
+EOF
+chmod 600 ~/.config/zchecker.config
+# Edit that file.  You'll likely want to replace /path/to with the
+# path to the zchecker working directory (same as ZDIR in
+# zchecker.env).
+
+# make a src directory
+cd $ZDIR
+mkdir src
+
+# zchecker requires a recent version of sqlite, at least 3.22.  If an
+# upgrade is necessary:
+cd $ZDIR/src
+wget https://sqlite.org/2019/sqlite-autoconf-3300100.tar.gz
+tar xzvf sqlite-autoconf-3300100.tar.gz
+cd sqlite-autoconf-3300100
+./configure --prefix=$VIRTUAL_ENV
+make
+make install
+
+# Install Montage, e.g.:
+cd $ZDIR/src
+wget https://github.com/Caltech-IPAC/Montage/archive/master.zip
+unzip master.zip
+cd Montage-master/
+make
+cp -r bin $ZDIR/.venv/
+cp -r lib $ZDIR/.venv/
+
+## install oorb
+## TBD
+
+# test out zchecker
+cd $ZDIR
+zchecker ztf-update --date=2019-11-05
+zchecker eph 29P --start=2019-01-01 --end=2020-12-31
+zchecker search 29P
+zchecker download-cutouts
+zproject
+zstack
+MPLBACKEND="Agg" zphot measure
+MPLBACKEND="Agg" zphot dump 29P
+
+# there should now be files in cutouts and stacks
