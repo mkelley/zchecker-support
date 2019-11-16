@@ -1,3 +1,4 @@
+#!/bin/bash
 source zchecker.env
 export ZDIR ZWEB ZBROWSER_SCRIPTS
 export target=$1

@@ -2,11 +2,13 @@
 #
 # example crontab line:
 #
-# 02 10 * * * cd /oort/msk && /bin/bash zchecker-daily-search.sh
+# 02 10 * * * cd /path/to/zchecker && /bin/bash zchecker-daily-search.sh
 #
+# Must be run from base zchecker working directory.
+#
+source .venv/bin/activate
 source zchecker.env
 export LOGROTATE ZDIR ZDATA ZWEB ZBROWSER_SCRIPTS
-source ${ZDIR}/.venv/bin/activate
 ${LOGROTATE} ${ZDATA}/logrotate.config -s ${ZDATA}/logrotate.state
 zchecker ztf-update
 zchecker search
