@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import os
 import json
 import argparse
@@ -79,7 +80,7 @@ WHERE desg GLOB '[CP]*'
             .format(target=comets[row[0]], v=row[1])
         for row in rows])
 
-summary = f'On the night of <' + base_url + '?obs-by-date={last_night}|{last_night}>, out of {exposures} exposure{"" if exposures == 1 else "s"}, {total} comet{" was" if total == 1 else "s were"} found.\n\n'
+summary = f'On the night of <{base_url}?obs-by-date={last_night}|{last_night}>, out of {exposures} exposure{"" if exposures == 1 else "s"}, {total} comet{" was" if total == 1 else "s were"} found.\n\n'
 
 if exposures == 0:
     text = 'No exposures were taken on {}.'.format(last_night)
@@ -87,7 +88,7 @@ if exposures == 0:
         'attachments': [
             {
                 'fallback': text,
-                'title': '<a href="' + base_url + '">ZChecker</a> Daily Summary',
+                'title': f'<{base_url}|ZChecker> Daily Summary',
                 'text': text
             }
         ]
@@ -97,7 +98,7 @@ else:
         'attachments': [
             {
                 'fallback': 'ZChecker daily summary for ' + last_night,
-                'title': '<a href="' + base_url + '">ZChecker</a> Daily Summary',
+                'title': f'<{base_url}|ZChecker> Daily Summary',
                 'text': summary,
                 'fields': [
                     {

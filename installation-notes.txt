@@ -17,18 +17,19 @@ pip install --upgrade pip setuptools
 pip install pipenv
 pipenv install
 
-# Create zchecker data directories.  They can be anywhere.  Assuming
-# they are in the zchecker working directory:
+# Create zchecker data directories.  They can be anywhere, but note
+# their location for zchecker.env and zchecker.config, below.
+# Assuming they are in the zchecker working directory:
 mkdir cutouts
 mkdir stacks
 
 # Get zbrowser:
-cd $ZDIR
 git clone https://github.com/mkelley/zbrowser.git
 
 # follow instructions in zbrowser/README.md
 
-# edit, move, and source zchecker.env
+# Back to the zchecker working directory, edit, move, and source
+# zchecker.env
 edit zchecker.env
 mv zchecker.env ${VIRTUAL_ENV}/bin/
 source zchecker.env
@@ -47,8 +48,7 @@ cat >~/.config/zchecker.config<<EOF
 EOF
 chmod 600 ~/.config/zchecker.config
 # Edit that file.  You'll likely want to replace /path/to with the
-# path to the zchecker working directory (same as ZDIR in
-# zchecker.env).
+# the zchecker working directory (same as ZDIR in zchecker.env).
 
 # make a src directory
 cd $ZDIR
@@ -76,15 +76,75 @@ cp -r lib $ZDIR/.venv/
 ## install oorb
 ## TBD
 
-# test out zchecker
+# Test out zchecker.
+#
+# Command summary:
+#   * ztf-update: download the ZTF pointing information for 2019 Nov 05
+#   * eph: download ephemerides for comet 29P over the month of Nov 2019
+#   * search: search for 29P in all observations in database, there
+#     should be 1 observation found
+#   * download-cutouts: download a cutout image around the of all found
+#     targets
+#   * zproject: resample all downloaded images, center on the target and
+#     rotate to place the Sun direction to the right
+#   * zstack: make nightly stacks of all found targets, by filter
+#   * zphot measure: measure aperture photometry at each found target
+#   * zphot dump: print photometry of 29P to the console
+#
+# The first time zchecker is run, there will be several errors about
+# the database, but they should be automatically corrected.
+#
+export MPLBACKEND
 cd $ZDIR
 zchecker ztf-update --date=2019-11-05
-zchecker eph 29P --start=2019-01-01 --end=2020-12-31
-zchecker search 29P
+zchecker eph 29P --start=2019-11-01 --end=2019-11-30
+zchecker search 29P --full
 zchecker download-cutouts
 zproject
 zstack
-MPLBACKEND="Agg" zphot measure
-MPLBACKEND="Agg" zphot dump 29P
+zphot measure
+zphot dump 29P
 
-# there should now be files in cutouts and stacks
+
+# Test out zbrowser.
+#
+# Command summary:
+#   * regenerate-zbrowserdb: creates the database file used for the web
+#     pages
+#   * pointing: makes all-sky plots of ZTF pointings and zchecker
+#     targets
+#   * stack2web: generates the quick-look images for the web pages
+#
+regenerate-zbrowserdb.sh
+python3 ${ZBROWSER_SCRIPTS}/pointing.py ${ZWEB}/img/pointing --frame=equatorial --date=2019-11-05
+python3 ${ZBROWSER_SCRIPTS}/pointing.py ${ZWEB}/img/pointing --frame=ecliptic --date=2019-11-05
+python3 ${ZBROWSER_SCRIPTS}/pointing.py ${ZWEB}/img/pointing --frame=galactic --date=2019-11-05
+python3 ${ZBROWSER_SCRIPTS}/stack2web.py ${ZWEB}/img/stacks --date=2019-11-05
+
+# Open a web browser and navigate to the served zbrowser directory.
+# There should be a summary for 2019 Nov 05, with the 29P detection.
+
+# Optional: setup Slack integration.
+#   * open https://api.slack.com/apps
+#   * create a Slack App connected to ZTF Solar System workspace
+#   * Activate Incoming Webhooks -> New Webhook to #auto-reports channel
+#   * copy webhook URL to zchecker.env (now in .venv/bin) SLACK_ZTFSSWG_POST_URL
+#   * Activate Incoming Webhooks -> New Webhook to direct message yourself
+#   * copy webhook URL to zchecker.env (now in .venv/bin) SLACK_USER_POST_URL
+#
+# Test it out:
+source zchecker.env
+# print to the console:
+slack-zchecker-daily.py -n
+# send direct message to yourself:
+slack-zchecker-daily.py --user
+# send message to #auto-reports channel
+slack-zchecker-daily.py
+
+# If the slack app is working, then add it to the end of
+# zchecker-daily-search.sh.  Be sure to include the "&& \" string at
+# the end of the previous command so that the script is only run if
+# the previous lines were successful.
+
+# Test zchecker-daily-search
+zchecker-daily-search.sh
