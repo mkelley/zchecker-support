@@ -8,7 +8,8 @@
 #
 source .venv/bin/activate && \
 source zchecker.env && \
-export LOGROTATE ZDIR ZDATA ZWEB ZBROWSER_SCRIPTS && \
+export LOGROTATE ZDIR ZDATA ZWEB ZBROWSER_SCRIPTS SLACK_USER_POST_URL \
+  SLACK_ZTFSSWG_POST_URL MPLBACKEND && \
 ${LOGROTATE} ${ZDATA}/logrotate.config -s ${ZDATA}/logrotate.state && \
 zchecker ztf-update && \
 zchecker search && \
