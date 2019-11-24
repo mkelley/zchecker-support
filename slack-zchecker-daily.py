@@ -21,6 +21,10 @@ ztfsswg_post_url = os.getenv('SLACK_ZTFSSWG_POST_URL')
 
 config = Config.from_file()
 with ZChecker(config=config, save_log=False) as z:
+    targets = {}
+    for i, d in z.db.execute('SELECT objid,desg FROM obj').fetchall():
+        targets[i] = d
+
     rows = z.db.execute('''
 SELECT objid,desg FROM obj
 WHERE desg GLOB '[CP]*'
@@ -80,7 +84,24 @@ WHERE desg GLOB '[CP]*'
             .format(target=comets[row[0]], v=row[1])
         for row in rows])
 
-summary = f'On the night of <{base_url}?obs-by-date={last_night}|{last_night}>, out of {exposures} exposure{"" if exposures == 1 else "s"}, {total} comet{" was" if total == 1 else "s were"} found.\n\n'
+    rows = z.db.execute('''
+    SELECT objid,MAX(ostat) AS max_ostat FROM ztf_phot
+    INNER JOIN ztf_found USING (foundid)
+    WHERE ''' + in_last_night + '''
+      AND ostat NOT NULL
+      AND ostat >= 3
+    GROUP BY objid
+    ''').fetchall()
+
+    if len(rows) == 0:
+        outbursts = 'No suspected outbursts.'
+    else:
+        outbursts = 'Possible outbursts:\n  ' + '\n  '.join([
+            ('<' + base_url + '?obs-by-target={target}|{target}> ({ostat:.1f})')
+            .format(target=targets[row[0]], ostat=row[1])
+            for row in rows])
+
+summary = f'On the night of <{base_url}?obs-by-date={last_night}|{last_night}>, out of {exposures} exposure{"" if exposures == 1 else "s"}, {total} comet{" was" if total == 1 else "s were"} found.\n{outbursts}\n\n'
 
 if exposures == 0:
     text = 'No exposures were taken on {}.'.format(last_night)

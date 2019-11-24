@@ -9,5 +9,6 @@ zchecker cutouts && \
 zproject && \
 zstack && \
 zphot measure && \
+zphot outburst --date="$date" --update && \
 bash ${ZDIR}/regenerate-zbrowserdb.sh && \
 python3 ${ZBROWSER_SCRIPTS}/stack2web.py ${ZWEB}/stacks --date=$date --full-update

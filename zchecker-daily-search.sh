@@ -17,6 +17,7 @@ zchecker download-cutouts && \
 zproject && \
 zstack && \
 zphot measure && \
+zphot outburst --update && \
 ${ZDIR}/regenerate-zbrowserdb.sh && \
 python3 ${ZBROWSER_SCRIPTS}/pointing.py ${ZWEB}/img/pointing --frame=equatorial && \
 python3 ${ZBROWSER_SCRIPTS}/pointing.py ${ZWEB}/img/pointing --frame=ecliptic && \
