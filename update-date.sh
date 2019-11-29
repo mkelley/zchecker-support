@@ -11,4 +11,4 @@ zstack && \
 zphot measure && \
 zphot outburst --date="$date" --update && \
 bash ${ZDIR}/regenerate-zbrowserdb.sh && \
-python3 ${ZBROWSER_SCRIPTS}/stack2web.py ${ZWEB}/stacks --date=$date --full-update
+python3 ${ZBROWSER_SCRIPTS}/stack2web.py ${ZWEB}/img/stacks --date=$date --full-update
