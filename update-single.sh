@@ -6,7 +6,7 @@ export searchopts=$2
 zchecker clean-eph "$target" && \
 zchecker clean-found "$target" && \
 zchecker clean-files && \
-zchecker eph "$target" --start=2017-10-15 --stop=2019-12-31 && \
+zchecker eph "$target" --start=2017-10-15 --stop=2020-12-31 && \
 zchecker search "$target" $searchopts --full && \
 zchecker cutouts "$target" && \
 zproject "$target" -f && \
