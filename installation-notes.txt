@@ -13,9 +13,9 @@ rm -rf master.zip zchecker-support-master
 # Create a virtual environment for zchecker:
 python3 -m venv .venv --prompt=zchecker
 source .venv/bin/activate
-pip install --upgrade pip setuptools
+pip install --upgrade pip setuptools wheel
 pip install pipenv
-pipenv install
+pipenv sync
 
 # Create zchecker data directories.  They can be anywhere, but note
 # their location for zchecker.env and zchecker.config, below.

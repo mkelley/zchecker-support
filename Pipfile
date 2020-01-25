@@ -15,12 +15,12 @@ cython = "*"
 montage-wrapper = "*"
 astroquery = "*"
 photutils = "*"
+synphot = "==0.1.3"
 sbpy = "*"
 sep = "*"
 sip-tpv = {editable = true,git = "git://github.com/stargaser/sip_tpv"}
 sbsearch = {editable = true,git = "git://github.com/Small-Bodies-Node/sbsearch",ref = "v0.1"}
 zchecker = {editable = true,git = "git://github.com/mkelley/zchecker",ref = "v2"}
-setuptools = "*"
 
 [requires]
 python_version = "3.6"
