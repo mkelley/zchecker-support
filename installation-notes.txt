@@ -67,14 +67,23 @@ make install
 # Install Montage, e.g.:
 cd $ZDIR/src
 wget https://github.com/Caltech-IPAC/Montage/archive/master.zip
-unzip master.zip
+unzip master.zip && rm -f master.zip
 cd Montage-master/
 make
 cp -r bin $ZDIR/.venv/
 cp -r lib $ZDIR/.venv/
 
 ## install oorb
-## TBD
+cd $ZDIR/src
+wget https://github.com/oorb/oorb/archive/master.zip
+unzip master.zip && rm -f master.zip
+cd oorb-master
+# My python virtual environment needed the following line:
+(cd $VIRTUAL_ENV/bin; ln -s /n/local/pkg/anaconda3-2019.10/bin/python3.7m-config python3-config)
+./configure gfortran opt --with-pyoorb --prefix=$VIRTUAL_ENV --with-python=$VIRTUAL_ENV/bin/python
+make -j4
+make ephem
+make test
 
 # Test out zchecker.
 #
