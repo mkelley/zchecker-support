@@ -85,6 +85,22 @@ WHERE desg GLOB '[CP]*'
         for row in rows])
 
     rows = z.db.execute('''
+    SELECT objid,count() AS c FROM ztf_found
+    WHERE ''' + is_comet.format(col='desg') + '''
+    AND ''' + in_last_night + '''
+    GROUP BY objid
+    ORDER BY c DESC
+    ''').fetchall()
+
+    if (len(rows) == 0) or (rows[0][1] < 10):
+        best_observed_comets = '(not applicable)'
+    else:
+        best_observed_comets = '\n'.join([
+            ('<' + base_url + '?obs-by-target={target}|{target}> ({c})')
+            .format(target=comets[row[0]], c=row[1])
+            for row in rows if row[1] > 9])
+
+    rows = z.db.execute('''
     SELECT objid,MAX(ostat) AS max_ostat FROM ztf_phot
     INNER JOIN ztf_found USING (foundid)
     WHERE ''' + in_last_night + '''
@@ -135,6 +151,11 @@ else:
                     {
                         'title': 'Brightest comets:',
                         'value': brightest_comets,
+                        'short': False
+                    },
+                    {
+                        'title': 'Best-observed comets:',
+                        'value': best_observed_comets,
                         'short': False
                     }
                 ]
