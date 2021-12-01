@@ -21,6 +21,9 @@ ztfsswg_post_url = os.getenv('SLACK_ZTFSSWG_POST_URL')
 
 config = Config.from_file()
 with ZChecker(config=config, save_log=False) as z:
+    z.db.create_function('sqrt', 1, math.sqrt)
+    z.db.create_function('pow', 2, math.pow)
+    
     targets = {}
     for i, d in z.db.execute('SELECT objid,desg FROM obj').fetchall():
         targets[i] = d
@@ -92,13 +95,14 @@ WHERE desg GLOB '[CP]*'
     ORDER BY c DESC
     ''').fetchall()
 
-    if (len(rows) == 0) or (rows[0][1] < 10):
+    if len(rows) == 0:
         best_observed_comets = '(not applicable)'
     else:
+        n = max(sum([row[1] > 9 for row in rows]), 5)
         best_observed_comets = '\n'.join([
             ('<' + base_url + '?obs-by-target={target}|{target}> ({c})')
             .format(target=comets[row[0]], c=row[1])
-            for row in rows if row[1] > 9])
+            for row in rows[:n]])
 
     rows = z.db.execute('''
     SELECT objid,MAX(ostat) AS max_ostat FROM ztf_phot
@@ -117,7 +121,27 @@ WHERE desg GLOB '[CP]*'
             .format(target=targets[row[0]], ostat=row[1])
             for row in rows])
 
-summary = f'On the night of <{base_url}?obs-by-date={last_night}|{last_night}>, out of {exposures} exposure{"" if exposures == 1 else "s"}, {total} comet{" was" if total == 1 else "s were"} found.\n{outbursts}\n\n'
+    # check for possible ephemeris updates
+    rows = z.db.execute('''
+    SELECT objid,POW(POW(ra3sig - last_ra3sig, 2) + POW(dec3sig - last_dec3sig, 2), 0.5) / (obsjd - last_obsjd) AS d
+    FROM (
+        SELECT nightid,objid,obsjd,
+               tmtp,LAG(obsjd) OVER (PARTITION BY objid ORDER BY obsjd) AS last_obsjd,
+               ra3sig,LAG(ra3sig) OVER (PARTITION BY objid ORDER BY obsjd) AS last_ra3sig,
+               dec3sig,LAG(dec3sig) OVER (PARTITION BY objid ORDER BY obsjd) AS last_dec3sig
+        FROM ztf_found ORDER BY obsjd DESC
+    ) WHERE ''' + in_last_night + ''' AND last_ra3sig > ra3sig AND last_dec3sig > dec3sig AND d > 0.3
+    GROUP BY objid ORDER BY d DESC;
+    ''').fetchall()
+    if len(rows) == 0:
+        ephemeris_updates = '';
+    else:
+        ephemeris_updates = '\nPossible ephemeris updates:\n  ' + '\n  '.join([
+            ('<' + base_url + '?obs-by-target={target}|{target}> ({d:.1f})')
+            .format(target=targets[row[0]], d=row[1])
+            for row in rows])
+
+summary = f'On the night of <{base_url}?obs-by-date={last_night}|{last_night}>, out of {exposures} exposure{"" if exposures == 1 else "s"}, {total} comet{" was" if total == 1 else "s were"} found.\n{outbursts}{ephemeris_updates}\n\n'
 
 if exposures == 0:
     text = 'No exposures were taken on {}.'.format(last_night)
