@@ -84,7 +84,7 @@ WHERE desg GLOB '[ACP]*'
         brightest_comets = '(not applicable)'
     else:
         brightest_comets = '\n'.join([
-            ('<' + base_url + '?obs-by-target={target_encoded}|{target}> ({v:.1f})')
+            ('<' + base_url + '?target={target_encoded}|{target}> ({v:.1f})')
             .format(target=comets[row[0]], target_encoded=quote(comets[row[0]]), v=row[1])
         for row in rows])
 
@@ -101,7 +101,7 @@ WHERE desg GLOB '[ACP]*'
     else:
         n = max(sum([row[1] > 9 for row in rows]), 5)
         best_observed_comets = '\n'.join([
-            ('<' + base_url + '?obs-by-target={target_encoded}|{target}> ({c})')
+            ('<' + base_url + '?target={target_encoded}|{target}> ({c})')
             .format(target=comets[row[0]], target_encoded=quote(comets[row[0]]), c=row[1])
             for row in rows[:n]])
 
@@ -118,7 +118,7 @@ WHERE desg GLOB '[ACP]*'
         outbursts = 'No suspected outbursts.'
     else:
         outbursts = 'Possible outbursts:\n  ' + '\n  '.join([
-            ('<' + base_url + '?obs-by-target={target_encoded}|{target}> ({ostat:.1f})')
+            ('<' + base_url + '?target={target_encoded}|{target}> ({ostat:.1f})')
             .format(target=targets[row[0]], ostat=row[1], target_encoded=quote(targets[row[0]]))
             for row in rows])
 
@@ -138,11 +138,11 @@ WHERE desg GLOB '[ACP]*'
         ephemeris_updates = '';
     else:
         ephemeris_updates = '\nPossible ephemeris updates:\n  ' + '\n  '.join([
-            ('<' + base_url + '?obs-by-target={target_encoded}|{target}> ({d:.1f})')
+            ('<' + base_url + '?target={target_encoded}|{target}> ({d:.1f})')
             .format(target=targets[row[0]], d=row[1], target_encoded=quote(targets[row[0]]))
             for row in rows])
 
-summary = f'On the night of <{base_url}?obs-by-date={last_night}|{last_night}>, out of {exposures} exposure{"" if exposures == 1 else "s"}, {total} comet{" was" if total == 1 else "s were"} found.\n{outbursts}{ephemeris_updates}\n\n'
+summary = f'On the night of <{base_url}?date={last_night}|{last_night}>, out of {exposures} exposure{"" if exposures == 1 else "s"}, {total} comet{" was" if total == 1 else "s were"} found.\n{outbursts}{ephemeris_updates}\n\n'
 
 if exposures == 0:
     text = 'No exposures were taken on {}.'.format(last_night)
