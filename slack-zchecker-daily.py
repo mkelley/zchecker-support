@@ -5,6 +5,7 @@ import argparse
 import requests
 import sqlite3
 import math
+from urllib.parse import quote
 from astropy.time import Time
 from zchecker import ZChecker, Config
 
@@ -30,10 +31,10 @@ with ZChecker(config=config, save_log=False) as z:
 
     rows = z.db.execute('''
 SELECT objid,desg FROM obj
-WHERE desg GLOB '[CP]*'
+WHERE desg GLOB '[ACP]*'
    OR desg GLOB '*[0-9]P'
    OR desg in ('2060', '4015', '7968', '60558', '118401', 
-               '323137', '300163', '457175')
+               '323137', '300163', '457175', '300163', '323137', '457175')
 ''').fetchall()
     comets = {}
     for i, d in rows:
@@ -83,8 +84,8 @@ WHERE desg GLOB '[CP]*'
         brightest_comets = '(not applicable)'
     else:
         brightest_comets = '\n'.join([
-            ('<' + base_url + '?obs-by-target={target}|{target}> ({v:.1f})')
-            .format(target=comets[row[0]], v=row[1])
+            ('<' + base_url + '?obs-by-target={target_encoded}|{target}> ({v:.1f})')
+            .format(target=comets[row[0]], target_encoded=quote(comets[row[0]]), v=row[1])
         for row in rows])
 
     rows = z.db.execute('''
@@ -100,8 +101,8 @@ WHERE desg GLOB '[CP]*'
     else:
         n = max(sum([row[1] > 9 for row in rows]), 5)
         best_observed_comets = '\n'.join([
-            ('<' + base_url + '?obs-by-target={target}|{target}> ({c})')
-            .format(target=comets[row[0]], c=row[1])
+            ('<' + base_url + '?obs-by-target={target_encoded}|{target}> ({c})')
+            .format(target=comets[row[0]], target_encoded=quote(comets[row[0]]), c=row[1])
             for row in rows[:n]])
 
     rows = z.db.execute('''
@@ -117,8 +118,8 @@ WHERE desg GLOB '[CP]*'
         outbursts = 'No suspected outbursts.'
     else:
         outbursts = 'Possible outbursts:\n  ' + '\n  '.join([
-            ('<' + base_url + '?obs-by-target={target}|{target}> ({ostat:.1f})')
-            .format(target=targets[row[0]], ostat=row[1])
+            ('<' + base_url + '?obs-by-target={target_encoded}|{target}> ({ostat:.1f})')
+            .format(target=targets[row[0]], ostat=row[1], target_encoded=quote(targets[row[0]]))
             for row in rows])
 
     # check for possible ephemeris updates
@@ -137,8 +138,8 @@ WHERE desg GLOB '[CP]*'
         ephemeris_updates = '';
     else:
         ephemeris_updates = '\nPossible ephemeris updates:\n  ' + '\n  '.join([
-            ('<' + base_url + '?obs-by-target={target}|{target}> ({d:.1f})')
-            .format(target=targets[row[0]], d=row[1])
+            ('<' + base_url + '?obs-by-target={target_encoded}|{target}> ({d:.1f})')
+            .format(target=targets[row[0]], d=row[1], target_encoded=quote(targets[row[0]]))
             for row in rows])
 
 summary = f'On the night of <{base_url}?obs-by-date={last_night}|{last_night}>, out of {exposures} exposure{"" if exposures == 1 else "s"}, {total} comet{" was" if total == 1 else "s were"} found.\n{outbursts}{ephemeris_updates}\n\n'
