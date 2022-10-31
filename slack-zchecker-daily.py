@@ -131,7 +131,8 @@ WHERE desg GLOB '[ACP]*'
                ra3sig,LAG(ra3sig) OVER (PARTITION BY objid ORDER BY obsjd) AS last_ra3sig,
                dec3sig,LAG(dec3sig) OVER (PARTITION BY objid ORDER BY obsjd) AS last_dec3sig
         FROM ztf_found ORDER BY obsjd DESC
-    ) WHERE ''' + in_last_night + ''' AND last_ra3sig > ra3sig AND last_dec3sig > dec3sig AND d > 0.3
+    ) WHERE ''' + in_last_night + ''' AND last_ra3sig > ra3sig AND last_dec3sig > dec3sig 
+        AND d > 0.3 AND POW(POW(ra3sig, 2) + POW(dec3sig, 2), 0.5) < 5
     GROUP BY objid ORDER BY d DESC;
     ''').fetchall()
     if len(rows) == 0:
