@@ -57,9 +57,9 @@ mkdir src
 # zchecker requires a recent version of sqlite, at least 3.22.  If an
 # upgrade is necessary:
 cd $ZDIR/src
-wget https://sqlite.org/2019/sqlite-autoconf-3300100.tar.gz
-tar xzvf sqlite-autoconf-3300100.tar.gz
-cd sqlite-autoconf-3300100
+wget https://sqlite.org/2022/sqlite-autoconf-3390200.tar.gz
+tar xzvf sqlite-autoconf-3390200.tar.gz
+cd sqlite-autoconf-3390200
 ./configure --prefix=$VIRTUAL_ENV
 make
 make install
