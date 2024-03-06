@@ -75,15 +75,15 @@ cp -r lib $ZDIR/.venv/
 
 ## install oorb
 cd $ZDIR/src
-wget https://github.com/oorb/oorb/archive/master.zip
-unzip master.zip && rm -f master.zip
-cd oorb-master
+git clone https://github.com/oorb/oorb/archive/master.zip
+cd oorb
 # My python virtual environment needed the following line:
 (cd $VIRTUAL_ENV/bin; ln -s /usr/bin/python3.9-config python3-config)
 ./configure gfortran opt --with-pyoorb --prefix=$VIRTUAL_ENV --with-python=$VIRTUAL_ENV/bin/python
 make -j4
 make ephem
 make test
+make install
 
 # Test out zchecker.
 #
